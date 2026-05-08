@@ -1,0 +1,7 @@
+-r requirements-core.txt
+openslide-python>=1.4,<2
+histomicstk>=1.4,<2
+stardist>=0.9,<1
+tensorflow-cpu>=2.16,<3
+scikit-image>=0.25,<1
+scipy>=1.14,<2
