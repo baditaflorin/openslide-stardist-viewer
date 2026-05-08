@@ -1,0 +1,64 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+
+# logs / temp
+*.log
+tmp/
+temp/
+.cache/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+coverage/
+htmlcov/
+
+# Node
+node_modules/
+npm-debug.log*
+pnpm-lock.yaml
+yarn.lock
+
+# Python
+__pycache__/
+*.py[cod]
+.python-version
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+
+# Go
+bin/
+*.test
+*.out
+vendor/
+
+# Backend runtime data
+data/slides/*
+!data/slides/.gitkeep
+data/results/*
+!data/results/.gitkeep
+
+# Docker / compose local state
+deploy/.env
+
+# Generated reports
+playwright-report/
+test-results/
+
+# Keep GitHub Pages publish directory tracked.
+!docs/
+!docs/**
