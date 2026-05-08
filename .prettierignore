@@ -1,0 +1,10 @@
+docs/
+node_modules/
+.venv/
+backend/.mypy_cache/
+backend/.ruff_cache/
+playwright-report/
+test-results/
+package-lock.json
+src/api/schema.ts
+src/generated/buildInfo.ts

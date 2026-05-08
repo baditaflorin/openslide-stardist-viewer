@@ -176,7 +176,18 @@ components:
           minimum: 1
     SlideMetadata:
       type: object
-      required: [id, name, filename, format, dimensions, level_count, level_dimensions, tile_size, properties]
+      required:
+        [
+          id,
+          name,
+          filename,
+          format,
+          dimensions,
+          level_count,
+          level_dimensions,
+          tile_size,
+          properties,
+        ]
       properties:
         id:
           type: string

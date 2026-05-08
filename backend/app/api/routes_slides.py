@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from io import BytesIO
+from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from fastapi.responses import Response
@@ -16,16 +17,18 @@ from app.slides.store import SlideStore
 
 router = APIRouter(prefix="/api", tags=["slides"])
 TILE_NAME_RE = re.compile(r"^(?P<column>\d+)_(?P<row>\d+)\.jpeg$")
+SlideStoreDep = Annotated[SlideStore, Depends(get_slide_store)]
+SegmentationServiceDep = Annotated[SegmentationService, Depends(get_segmentation_service)]
 
 
 @router.get("/slides", response_model=SlideListResponse)
-async def list_slides(store: SlideStore = Depends(get_slide_store)) -> SlideListResponse:
+async def list_slides(store: SlideStoreDep) -> SlideListResponse:
     store.scan()
     return SlideListResponse(slides=store.list_slides())
 
 
 @router.get("/slides/{slide_id}/dzi")
-async def get_dzi(slide_id: str, store: SlideStore = Depends(get_slide_store)) -> Response:
+async def get_dzi(slide_id: str, store: SlideStoreDep) -> Response:
     metadata = store.get_metadata(slide_id)
     xml = (
         f'<Image TileSize="{metadata.tile_size}" Overlap="0" Format="jpeg" '
@@ -41,7 +44,7 @@ async def get_tile(
     slide_id: str,
     level: int,
     tile_name: str,
-    store: SlideStore = Depends(get_slide_store),
+    store: SlideStoreDep,
 ) -> Response:
     match = TILE_NAME_RE.match(tile_name)
     if not match:
@@ -57,7 +60,7 @@ async def get_tile(
 
 
 @router.get("/slides/{slide_id}/thumbnail")
-async def get_thumbnail(slide_id: str, size: int = 900, store: SlideStore = Depends(get_slide_store)) -> Response:
+async def get_thumbnail(slide_id: str, store: SlideStoreDep, size: int = 900) -> Response:
     reader = store.get_reader(slide_id)
     image = reader.get_thumbnail(size)
     buffer = BytesIO()
@@ -69,8 +72,8 @@ async def get_thumbnail(slide_id: str, size: int = 900, store: SlideStore = Depe
 async def segment_slide_region(
     slide_id: str,
     request: SegmentRequest,
-    store: SlideStore = Depends(get_slide_store),
-    segmenter: SegmentationService = Depends(get_segmentation_service),
+    store: SlideStoreDep,
+    segmenter: SegmentationServiceDep,
 ) -> SegmentResponse:
     if slide_id not in store.records:
         raise NotFoundError("Slide not found.")
@@ -79,6 +82,5 @@ async def segment_slide_region(
 
 
 @router.get("/slides/{slide_id}", response_model=SlideMetadata)
-async def get_slide(slide_id: str, store: SlideStore = Depends(get_slide_store)) -> SlideMetadata:
+async def get_slide(slide_id: str, store: SlideStoreDep) -> SlideMetadata:
     return store.get_metadata(slide_id)
-

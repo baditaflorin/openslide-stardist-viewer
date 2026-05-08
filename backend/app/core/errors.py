@@ -51,7 +51,13 @@ async def validation_error_handler(_: Request, exc: RequestValidationError) -> J
     logger.info("Request validation error: %s", exc)
     return JSONResponse(
         status_code=422,
-        content={"error": {"code": "validation_error", "message": "The request payload is invalid.", "details": {"errors": exc.errors()}}},
+        content={
+            "error": {
+                "code": "validation_error",
+                "message": "The request payload is invalid.",
+                "details": {"errors": exc.errors()},
+            }
+        },
     )
 
 

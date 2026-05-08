@@ -224,7 +224,9 @@ def open_slide_reader(slide_id: str, path: Path, tile_size: int) -> SlideReader:
     return PillowSlideReader(slide_id, path, tile_size)
 
 
-def _clamp_region(x: int, y: int, width: int, height: int, max_width: int, max_height: int) -> tuple[int, int, int, int]:
+def _clamp_region(
+    x: int, y: int, width: int, height: int, max_width: int, max_height: int
+) -> tuple[int, int, int, int]:
     if width <= 0 or height <= 0:
         raise BadRequestError("Region width and height must be positive.")
     x = max(0, min(x, max_width - 1))
