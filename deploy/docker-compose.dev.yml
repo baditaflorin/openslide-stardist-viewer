@@ -1,0 +1,31 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        INSTALL_ML: "false"
+    image: openslide-stardist-viewer:dev
+    env_file:
+      - .env.example
+    volumes:
+      - ../backend/app:/app/app:ro
+      - ../data/slides:/data/slides:ro
+      - ../data/results:/data/results
+    ports:
+      - "25342:8080"
+    read_only: false
+    command:
+      [
+        "uvicorn",
+        "app.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8080",
+        "--reload",
+      ]
+
+  nginx:
+    profiles:
+      - production-proxy

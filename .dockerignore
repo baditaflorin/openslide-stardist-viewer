@@ -1,0 +1,13 @@
+.git
+.venv
+node_modules
+docs/assets
+playwright-report
+test-results
+tmp
+data/slides/*
+data/results/*
+*.log
+.env
+.env.*
+!.env.example

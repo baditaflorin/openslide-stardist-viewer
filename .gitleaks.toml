@@ -1,0 +1,12 @@
+title = "openslide-stardist-viewer gitleaks config"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Public project URLs"
+regexes = [
+  '''https://github\.com/baditaflorin/openslide-stardist-viewer''',
+  '''https://baditaflorin\.github\.io/openslide-stardist-viewer/''',
+  '''https://www\.paypal\.com/paypalme/florinbadita'''
+]

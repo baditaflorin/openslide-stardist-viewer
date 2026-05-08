@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+message_file="${1:?commit message file required}"
+first_line="$(head -n 1 "$message_file")"
+
+if [[ ! "$first_line" =~ ^(feat|fix|docs|chore|refactor|test|ops|data|security|perf)(\([a-zA-Z0-9_-]+\))?:\ .+ ]]; then
+  echo "Commit message must use Conventional Commits, e.g. feat: add tile endpoint"
+  exit 1
+fi

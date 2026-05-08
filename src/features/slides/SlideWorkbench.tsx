@@ -40,6 +40,7 @@ export function SlideWorkbench() {
     null,
   );
   const [toast, setToast] = useState<string | null>(null);
+  const [publishedCommit, setPublishedCommit] = useState<string | null>(null);
   const viewerRef = useRef<SlideViewerHandle | null>(null);
 
   const healthQuery = useBackendHealth(apiBaseUrl);
@@ -60,6 +61,25 @@ export function SlideWorkbench() {
       window.localStorage.setItem(SELECTED_SLIDE_KEY, selectedSlide.id);
     }
   }, [selectedSlide]);
+
+  useEffect(() => {
+    if (import.meta.env.MODE === "test") {
+      return;
+    }
+    const controller = new AbortController();
+    fetch(
+      "https://api.github.com/repos/baditaflorin/openslide-stardist-viewer/commits/main",
+      { signal: controller.signal },
+    )
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload: { sha?: string } | null) => {
+        if (payload?.sha) {
+          setPublishedCommit(payload.sha.slice(0, 7));
+        }
+      })
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, []);
 
   function saveApiBaseUrl() {
     try {
@@ -105,7 +125,7 @@ export function SlideWorkbench() {
             <h1>OpenSlide StarDist Viewer</h1>
             <div className="build-line">
               <span>v{buildInfo.version}</span>
-              <span>{buildInfo.commit}</span>
+              <span>{publishedCommit ?? buildInfo.commit}</span>
             </div>
           </div>
         </div>
@@ -174,11 +194,10 @@ export function SlideWorkbench() {
               <RefreshCcw size={16} />
             </button>
           </div>
-          <div className="slide-list" role="list">
+          <div className="slide-list">
             {slides.map((slide) => (
               <button
                 type="button"
-                role="listitem"
                 className={
                   slide.id === selectedSlide?.id
                     ? "slide-row active"

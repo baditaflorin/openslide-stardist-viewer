@@ -1,4 +1,3 @@
-import { execSync } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,21 +7,9 @@ const packageJson = JSON.parse(
   readFileSync(resolve(root, "package.json"), "utf8"),
 );
 
-function gitValue(command, fallback) {
-  try {
-    return execSync(command, { cwd: root, stdio: ["ignore", "pipe", "ignore"] })
-      .toString()
-      .trim();
-  } catch {
-    return fallback;
-  }
-}
-
 const info = {
   version: packageJson.version,
-  commit:
-    process.env.VITE_COMMIT_SHA ||
-    gitValue("git rev-parse --short HEAD", "dev"),
+  commit: process.env.VITE_COMMIT_SHA || "local",
   repositoryUrl:
     process.env.VITE_REPOSITORY_URL ||
     "https://github.com/baditaflorin/openslide-stardist-viewer",
@@ -30,7 +17,6 @@ const info = {
     process.env.VITE_PAYPAL_URL ||
     "https://www.paypal.com/paypalme/florinbadita",
   pagesUrl: "https://baditaflorin.github.io/openslide-stardist-viewer/",
-  builtAt: new Date().toISOString(),
 };
 
 const target = resolve(root, "src/generated/buildInfo.ts");
