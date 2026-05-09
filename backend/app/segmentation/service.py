@@ -59,7 +59,7 @@ class SegmentationService:
             warnings=warnings,
             tissue=tissue,
             provenance=SegmentProvenance(
-                app_version="0.2.0",
+                app_version="0.3.0",
                 schema_version="segment.v2",
                 slide_id=reader.slide_id,
                 region=Region(x=request.x, y=request.y, width=request.width, height=request.height),
