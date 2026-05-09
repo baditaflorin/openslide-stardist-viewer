@@ -20,3 +20,22 @@ Scope: current `main` at `62ff1e3` before Phase 3 implementation.
 | Backend result storage | Claimed as reserved, not shipped | Architecture doc says result volume is reserved/future. | Docs can imply persistence that does not exist. | Correct docs to frontend-local exports only. |
 
 Before counts: 2 green, 1 yellow, 9 red.
+
+## After Phase 3
+
+| Pathway | After status | Evidence |
+| --- | --- | --- |
+| Cell count display | Works fully | Unchanged summary panel. |
+| Overlay display | Works fully | Unchanged OpenSeadragon overlay. |
+| CSV export | Works fully | `segmentationToCsv` is unit-tested and wired to Export CSV. |
+| JSON export | Works fully | `buildSegmentationJsonExport` is unit-tested and wired to Export JSON. |
+| Copy-to-clipboard | Works fully | Summary and curl copy actions are wired with fallback error copy. |
+| Share link | Works fully | `workbench-state/v1` hash round-trip is unit-tested. |
+| Downloadable state file | Works fully | Save Session and Import Session use the same Zod schema. |
+| Print/PDF view | Works fully | Print action and print CSS are shipped. |
+| Screenshot | Permanently out of scope | ADR 0062 keeps OS/browser screenshot tools as the pathway. |
+| Embed code | Permanently out of scope | ADR 0062; private backend embedding is not a Phase 3 target. |
+| API/curl-ready output | Works fully | Current segmentation request curl command is copyable. |
+| Backend result storage | Permanently out of scope | ADR 0062; browser exports replaced the reserved result-volume claim. |
+
+After counts: 9 green, 3 ADR-out-of-scope, 0 yellow, 0 red.

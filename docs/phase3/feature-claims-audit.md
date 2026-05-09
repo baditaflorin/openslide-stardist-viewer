@@ -19,3 +19,17 @@ Scope: README, docs, ADRs, and in-app labels on current `main` at `62ff1e3`.
 | Quickstart reaches usable local story | README | Shipped partially | `make smoke` works, but quickstart does not explicitly say how to start the backend and open the page after smoke. | Clarify quickstart. |
 
 Before counts: 9 green, 2 yellow, 0 red.
+
+## After Phase 3
+
+| Claim | After status | Evidence |
+| --- | --- | --- |
+| Static GitHub Pages viewer | Shipped fully | `make build` writes `docs/`. |
+| Local backend streams tiles and segments nuclei | Shipped fully | Smoke test exercises health, slides, tiles, and segmentation. |
+| Version, commit, repository, PayPal links | Shipped fully | Topbar still renders all four. |
+| Result exports | Shipped fully | Browser JSON/CSV/copy/print/curl outputs are available after segmentation. |
+| Session persistence | Shipped fully | Local settings persist and session JSON/share links restore portable state. |
+| Result volume/server storage | Corrected | Architecture and README describe browser exports, not a shipped server result DB. |
+| Quickstart reaches usable local story | Corrected | README now distinguishes smoke verification from manual backend/frontend operation. |
+
+After counts: 11 green/corrected, 0 yellow, 0 red.

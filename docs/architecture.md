@@ -24,19 +24,17 @@ C4Context
 C4Container
   title Container Diagram
   Boundary(pages, "GitHub Pages boundary") {
-    Container(frontend, "Static frontend", "React, TypeScript, Vite, OpenSeadragon", "Slide list, tile viewer, overlays, build version and commit")
+    Container(frontend, "Static frontend", "React, TypeScript, Vite, OpenSeadragon", "Slide list, tile viewer, overlays, browser exports, build version and commit")
   }
   Boundary(privateHost, "Private Docker host boundary") {
     Container(nginx, "nginx", "TLS reverse proxy", "CORS, rate limits, security headers, blocks public metrics")
     Container(api, "Backend API", "FastAPI, OpenSlide C, HistomicsTK, StarDist", "Slide scan, Deep Zoom tiles, thumbnails, segmentation, cell counts")
     Container(prom, "Prometheus", "Profile-gated", "Scrapes backend metrics")
     ContainerDb(slides, "Slide volume", "Filesystem", "SVS, TIFF, NDPI, PNG, JPEG")
-    ContainerDb(results, "Result volume", "Filesystem", "Reserved for exported results")
   }
   Rel(frontend, nginx, "GET/POST", "HTTPS JSON and JPEG")
   Rel(nginx, api, "Proxy", "HTTP :8080")
   Rel(api, slides, "Reads", "filesystem")
-  Rel(api, results, "Writes future exports", "filesystem")
   Rel(prom, api, "Scrapes", "HTTP /metrics")
 ```
 
@@ -70,4 +68,5 @@ sequenceDiagram
   Pages->>API: POST /api/slides/{id}/segment
   API->>SlideDir: Read selected region
   API-->>Pages: Nuclei count and overlays
+  User->>Pages: Export JSON/CSV/session or copy summary/curl
 ```

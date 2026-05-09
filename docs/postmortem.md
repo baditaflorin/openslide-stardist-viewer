@@ -32,11 +32,11 @@ OpenSlide and StarDist are the easy architecture call but the expensive packagin
 - The Docker runtime uses `python:slim` instead of distroless because the backend is Python and needs native image libraries.
 - HistomicsTK and StarDist are optional at local smoke-test time.
 - The fallback segmentation is not a clinical algorithm; it exists to make development and smoke tests deterministic.
-- Result export storage is reserved but not exposed in the UI.
+- Server-side result storage is not exposed in the UI; browser exports are the supported take-out path.
 
 ## Next Improvements
 
-1. Add result export as GeoJSON/CSV and persist it under `data/results`.
+1. Add optional GeoJSON export for tools that consume spatial annotations.
 2. Add ROI drawing instead of segmenting only the current viewport.
 3. Add model warmup and tiled segmentation for larger regions.
 

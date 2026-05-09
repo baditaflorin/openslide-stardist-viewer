@@ -20,3 +20,14 @@ Scope: current `main` at `62ff1e3` before Phase 3 implementation.
 | Settings controls | Works partially | Backend URL is a setting; no settings section or max nuclei persistence. | Add a compact settings section with only working controls. |
 
 Before counts: 9 green, 1 yellow, 2 red.
+
+## After Phase 3
+
+| Control group | After status | Evidence |
+| --- | --- | --- |
+| Project links, backend connection, refresh, slide selection, segment, cancel, debug | Works fully | Existing controls still pass smoke. |
+| Result export controls | Works fully | Export JSON, Export CSV, Copy Summary, Copy curl, and Print enable after segmentation. |
+| Session controls | Works fully | Save Session, Import Session, Share Link, and Start Fresh are wired. |
+| Settings controls | Works fully | Max nuclei setting changes the segmentation request and persists. |
+
+After counts: 12 green, 0 yellow, 0 red.

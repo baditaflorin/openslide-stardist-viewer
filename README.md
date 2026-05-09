@@ -1,7 +1,7 @@
 # OpenSlide StarDist Viewer
 
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
-![Version](https://img.shields.io/badge/version-0.2.0-blue)
+![Version](https://img.shields.io/badge/version-0.3.0-blue)
 ![GitHub Pages](https://img.shields.io/badge/live-GitHub%20Pages-1d655b)
 
 Live site: https://baditaflorin.github.io/openslide-stardist-viewer/
@@ -24,7 +24,31 @@ make backend-venv
 make smoke
 ```
 
-Put local slides in `data/slides/`, run the backend on `http://localhost:25342`, then open https://baditaflorin.github.io/openslide-stardist-viewer/.
+`make smoke` builds the Pages artifact, starts the local backend with a generated demo slide, opens the static viewer in Playwright, segments the viewport, and checks the export controls.
+
+For your own slides:
+
+```bash
+mkdir -p data/slides
+cp /path/to/your/slides/* data/slides/
+cd backend && SLIDE_VIEWER_SLIDE_DIR=../data/slides ../.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 25342
+```
+
+Then open https://baditaflorin.github.io/openslide-stardist-viewer/ and keep the backend URL set to `http://localhost:25342`.
+
+## Shipped Features
+
+- GitHub Pages React viewer with OpenSeadragon tile streaming from a configurable backend.
+- Local FastAPI backend for OpenSlide-compatible slides, scan diagnostics, Deep Zoom tiles, Prometheus metrics, and StarDist/HistomicsTK/fallback segmentation.
+- Nuclei count overlays with confidence, tissue coverage, warnings, provenance, version, and commit display.
+- Browser take-out paths: segmentation JSON, nuclei CSV, copied summary, copied curl command, and print.
+- Portable session state: save/import JSON, share a small hash link, persisted backend URL, selected slide, and max nuclei setting.
+
+## Limitations
+
+- Slides are loaded from the backend slide directory, not uploaded directly into GitHub Pages.
+- Remote slide URL ingestion, browser WSI drag/drop, backend result databases, auth, and cross-device sync are not part of v0.3.0.
+- The public Pages frontend never stores secrets or slide pixels. Segmentation results are saved only when you explicitly export or copy them.
 
 ## Architecture
 
@@ -33,7 +57,7 @@ C4Container
   title OpenSlide StarDist Viewer
   Person(user, "Pathology researcher", "Views local slides and counts nuclei")
   Boundary(pages, "GitHub Pages", "Static public surface") {
-    Container(frontend, "React viewer", "Vite, OpenSeadragon", "Tile viewer, segmentation overlays, version and commit display")
+    Container(frontend, "React viewer", "Vite, OpenSeadragon", "Tile viewer, segmentation overlays, exports, version and commit display")
   }
   Boundary(local, "Local or server Docker host", "Private slide data boundary") {
     Container(api, "Backend API", "FastAPI, OpenSlide, HistomicsTK, StarDist", "Tiles, thumbnails, segmentation, Prometheus metrics")

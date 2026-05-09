@@ -44,12 +44,12 @@ Date: 2026-05-10
 
 ## Phase 3 Success Metrics
 
-- Output audit green or ADR-out-of-scope for 100% of rows.
-- Input audit green or ADR-out-of-scope for 100% of rows.
-- Result JSON and CSV export utilities have deterministic unit tests.
-- State export/import/hash round-trip is deterministic in unit tests.
-- `make test`, `make build`, and `make smoke` pass before push.
-- README feature claims match implemented controls.
+- Output audit green or ADR-out-of-scope for 100% of rows. Met.
+- Input audit green or ADR-out-of-scope for 100% of rows. Met.
+- Result JSON and CSV export utilities have deterministic unit tests. Met.
+- State export/import/hash round-trip is deterministic in unit tests. Met.
+- `make test`, `make build`, and `make smoke` pass before push. Met during implementation pushes; rerun for release.
+- README feature claims match implemented controls. Met after docs alignment.
 
 ## Out of Scope
 

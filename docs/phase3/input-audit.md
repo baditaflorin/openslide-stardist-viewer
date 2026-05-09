@@ -23,3 +23,25 @@ Scope: current `main` at `62ff1e3` before Phase 3 implementation.
 | Restored autosave | Works partially | Backend URL and selected slide persist; max nuclei/settings/results do not. | Reload keeps only part of the session. | Add versioned settings persistence and start-fresh reset. |
 
 Before counts: 4 green, 4 yellow, 7 red.
+
+## After Phase 3
+
+| Pathway | After status | Evidence |
+| --- | --- | --- |
+| Backend URL input | Works fully | Validated and persisted through the workbench state helpers. |
+| Backend slide directory scan | Works fully | Unchanged canonical WSI input path. |
+| Slide selection | Works fully | Persists through local storage, session export, and share hash. |
+| Browser file upload | Permanently out of scope | ADR 0061 keeps WSI ingestion in the backend slide directory. |
+| Drag and drop | Permanently out of scope | ADR 0061; direct browser slide ingestion would change architecture. |
+| Paste text/HTML/image | Permanently out of scope | ADR 0061; not a supported slide source. |
+| URL input for slide source | Permanently out of scope | ADR 0061; no remote slide ingestion in Phase 3. |
+| Clipboard read | Permanently out of scope | File-based session import is the supported restore path. |
+| Mobile file picker | Permanently out of scope | Mobile users use a reachable backend, not local slide upload. |
+| Multi-file input | Works fully through backend | Backend recursive scan remains the batch pathway. |
+| Folder input | Works fully through backend | Backend scan handles supported files and file-level problems. |
+| Sample/demo | Works fully locally | Smoke fixture exercises a real end-to-end flow. |
+| Deep links | Works fully for small state | Share link encodes backend URL, selected slide, and settings. |
+| Imported state | Works fully | Versioned JSON session import is wired in the settings block. |
+| Restored autosave | Works fully for settings | Backend URL, selected slide, and max nuclei persist; result payloads remain explicit exports. |
+
+After counts: 8 green, 7 ADR-out-of-scope, 0 yellow, 0 red.

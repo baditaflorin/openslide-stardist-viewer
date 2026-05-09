@@ -56,3 +56,13 @@ No abandoned source files were found. Generated OpenAPI types include unused sch
 | UI output controls | None because controls absent. | Add smoke/e2e coverage for visible controls after segmentation. |
 
 Before metrics: 3 DRY findings, 2 SOLID findings, 0 production TODOs, 2 source type-safety holes, 3 test holes.
+
+## After Phase 3
+
+| Metric | Before | After | Evidence |
+| --- | --- | --- | --- |
+| DRY findings in core modules | 3 | 0 accepted | Export formatting and workbench state moved to tested helpers. |
+| SOLID findings | 2 | 0 blocking | `SlideWorkbench` still orchestrates UI, but persistence/export logic moved out. |
+| Production TODO/FIXME/XXX/HACK | 0 | 0 | `rg` audit remains clean. |
+| Source type-safety holes | 2 | 0 blocking | API error cast, OpenAPI POST cast, and root element cast removed. Generated/test boundaries documented in ADR 0069. |
+| Real-user path test holes | 3 | 0 blocking | Export/state unit tests and e2e output-control assertions added. |
