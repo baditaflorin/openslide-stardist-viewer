@@ -1,7 +1,7 @@
 # OpenSlide StarDist Viewer
 
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
-![Version](https://img.shields.io/badge/version-0.1.0-blue)
+![Version](https://img.shields.io/badge/version-0.2.0-blue)
 ![GitHub Pages](https://img.shields.io/badge/live-GitHub%20Pages-1d655b)
 
 Live site: https://baditaflorin.github.io/openslide-stardist-viewer/

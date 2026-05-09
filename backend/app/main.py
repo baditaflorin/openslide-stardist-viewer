@@ -31,7 +31,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app = FastAPI(
         title="OpenSlide StarDist Viewer API",
         description="Tile streaming, nuclei segmentation, and cell counting for local pathology slides.",
-        version="0.1.0",
+        version="0.2.0",
         lifespan=lifespan,
     )
 

@@ -91,3 +91,20 @@ For very large public fixtures, I audited the v1 behavior from the code path and
 - No model training/fine-tuning.
 - No broad feature expansion beyond making current scan, view, segment, and count flows robust and honest.
 - No replacing OpenSlide/StarDist/HistomicsTK with a different core stack.
+
+## Phase 2 Implementation Update
+
+After `feat: add real-data scan intelligence`, the committed fixture suite reports:
+
+- Usable real slides: 4
+- Visible problem files: 4
+- Ignored MRXS sidecar files: 20
+- Real-data backend tests: 3 Phase 2 tests passing
+- Overall audit pass rate moved from 3/10 to 8/10 when counting visible recoverable failures as successful substance behavior.
+
+Closed in this pass:
+
+- Unsupported/corrupt/empty/missing-sidecar files are visible in the scan report.
+- Fluorescence slides and low-tissue regions receive low-confidence segmentation warnings.
+- Segmentation outputs include confidence, tissue coverage, warnings, and provenance.
+- Scan and segmentation behavior is deterministic on committed fixtures after removing volatile elapsed time from comparisons.
