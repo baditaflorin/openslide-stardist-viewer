@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import type { paths } from "./schema";
 
-const API_BASE_STORAGE_KEY = "openslide-stardist-viewer.apiBaseUrl";
+export const API_BASE_STORAGE_KEY = "openslide-stardist-viewer.apiBaseUrl";
 
 export const apiBaseUrlSchema = z
   .string()
@@ -34,12 +34,14 @@ export function makeApiClient(baseUrl: string) {
   return createClient<paths>({ baseUrl });
 }
 
+const errorWithMessageSchema = z.object({
+  error: z.object({ message: z.string().min(1) }),
+});
+
 export function apiErrorMessage(error: unknown): string {
-  if (error && typeof error === "object" && "error" in error) {
-    const apiError = error.error as { message?: string };
-    if (apiError.message) {
-      return apiError.message;
-    }
+  const parsed = errorWithMessageSchema.safeParse(error);
+  if (parsed.success) {
+    return parsed.data.error.message;
   }
   if (error instanceof Error) {
     return error.message;
