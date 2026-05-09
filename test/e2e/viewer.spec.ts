@@ -24,4 +24,11 @@ test("loads the published viewer and counts nuclei", async ({ page }) => {
   await expect(page.getByText(/nuclei counted/i)).toBeVisible({
     timeout: 20_000,
   });
+  await expect(
+    page.getByRole("button", { name: /Export JSON/i }),
+  ).toBeEnabled();
+  await expect(page.getByRole("button", { name: /Export CSV/i })).toBeEnabled();
+  await expect(
+    page.getByRole("button", { name: /Copy Summary/i }),
+  ).toBeEnabled();
 });

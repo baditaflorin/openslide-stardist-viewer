@@ -273,6 +273,50 @@ h2 {
   padding-top: 14px;
 }
 
+.settings-block {
+  display: grid;
+  gap: 9px;
+  border-top: 1px solid #dbe3dd;
+  padding-top: 14px;
+}
+
+.settings-block label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #405149;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.settings-block input[type="number"] {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid #c9d6ce;
+  border-radius: 8px;
+  padding: 0 10px;
+  color: #17201d;
+  background: #ffffff;
+}
+
+.session-actions,
+.output-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.session-actions button,
+.output-actions button {
+  min-height: 36px;
+  padding: 0 8px;
+  font-size: 0.78rem;
+}
+
+.output-actions button:last-child {
+  grid-column: 1 / -1;
+}
+
 .count-number {
   font-size: 2.4rem;
   line-height: 1;
@@ -327,6 +371,13 @@ dd {
   border-color: #d6ded9;
   background: #d6ded9;
   color: #78877f;
+  cursor: not-allowed;
+}
+
+.slide-panel button:disabled {
+  border-color: #d6ded9;
+  background: #eef2ef;
+  color: #87948e;
   cursor: not-allowed;
 }
 
@@ -421,6 +472,15 @@ dd {
   transform: translateY(0);
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 .fatal-shell {
   min-height: 100vh;
   display: grid;
@@ -474,5 +534,32 @@ dd {
   .slide-panel {
     border-right: 0;
     border-bottom: 1px solid #dbe3dd;
+  }
+}
+
+@media print {
+  .top-actions,
+  .connection-strip,
+  .panel-heading button,
+  .session-actions,
+  .output-actions,
+  .primary-action,
+  .viewer-section,
+  .toast {
+    display: none !important;
+  }
+
+  .app-shell,
+  .topbar,
+  .slide-panel {
+    background: #ffffff;
+  }
+
+  .workspace {
+    display: block;
+  }
+
+  .slide-panel {
+    border: 0;
   }
 }
