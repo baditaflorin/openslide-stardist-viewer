@@ -63,7 +63,7 @@ export function useSegmentSlide(apiBaseUrl: string, slideId: string | null) {
         params: { path: { slide_id: slideId } },
         body: region,
         signal,
-      } as Parameters<typeof client.POST>[1];
+      };
       const { data, error } = await client.POST(
         "/api/slides/{slide_id}/segment",
         options,
