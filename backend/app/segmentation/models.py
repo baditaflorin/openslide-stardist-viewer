@@ -27,6 +27,33 @@ class Nucleus(BaseModel):
     polygon: list[tuple[float, float]]
 
 
+class Confidence(BaseModel):
+    score: float = Field(ge=0, le=1)
+    label: str
+    reasons: list[str] = Field(default_factory=list)
+
+
+class SegmentWarning(BaseModel):
+    code: str
+    severity: str
+    message: str
+    next_step: str | None = None
+
+
+class TissueSummary(BaseModel):
+    coverage: float = Field(ge=0, le=1)
+    mean_luminance: float = Field(ge=0, le=255)
+    is_blank: bool
+
+
+class SegmentProvenance(BaseModel):
+    app_version: str
+    schema_version: str
+    slide_id: str
+    region: Region
+    parameters: dict[str, int | str | float]
+
+
 class SegmentResponse(BaseModel):
     slide_id: str
     method: str
@@ -34,4 +61,7 @@ class SegmentResponse(BaseModel):
     count: int
     elapsed_ms: float
     nuclei: list[Nucleus]
-
+    confidence: Confidence
+    warnings: list[SegmentWarning] = Field(default_factory=list)
+    tissue: TissueSummary
+    provenance: SegmentProvenance

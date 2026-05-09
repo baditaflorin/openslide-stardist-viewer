@@ -1,0 +1,7 @@
+{
+  "id": "philips-4-sparse-bigtiff",
+  "source_url": "https://openslide.cs.cmu.edu/download/openslide-testdata/Philips-TIFF/Philips-4.tiff",
+  "size_bytes": 290988032,
+  "why_external": "Public real sparse BigTIFF is large; Phase 2 tests assert sparse-risk inference through vendor/format metadata.",
+  "expected_warning_code": "sparse_slide_risk"
+}

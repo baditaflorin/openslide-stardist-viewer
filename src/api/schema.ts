@@ -4,407 +4,663 @@
  */
 
 export interface paths {
-  "/healthz": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/healthz": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Healthz */
+        get: operations["healthz_healthz_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["getHealthz"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/readyz": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/readyz": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Readyz */
+        get: operations["readyz_readyz_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["getReadyz"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/slides": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/slides": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Slides */
+        get: operations["list_slides_api_slides_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["listSlides"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/slides/{slide_id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/slides/{slide_id}/dzi": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Dzi */
+        get: operations["get_dzi_api_slides__slide_id__dzi_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["getSlide"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/slides/{slide_id}/dzi": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/slides/{slide_id}_files/{level}/{tile_name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Tile */
+        get: operations["get_tile_api_slides__slide_id__files__level___tile_name__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["getSlideDzi"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/slides/{slide_id}_files/{level}/{column}_{row}.jpeg": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/slides/{slide_id}/thumbnail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Thumbnail */
+        get: operations["get_thumbnail_api_slides__slide_id__thumbnail_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["getSlideTile"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/slides/{slide_id}/thumbnail": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/slides/{slide_id}/segment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Segment Slide Region */
+        post: operations["segment_slide_region_api_slides__slide_id__segment_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["getSlideThumbnail"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/slides/{slide_id}/segment": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/slides/{slide_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Slide */
+        get: operations["get_slide_api_slides__slide_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post: operations["segmentSlideRegion"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    HealthResponse: {
-      status: string;
-    };
-    ReadyResponse: {
-      status: string;
-      slides: number;
-    };
-    Dimensions: {
-      width: number;
-      height: number;
-    };
-    SlideMetadata: {
-      id: string;
-      name: string;
-      filename: string;
-      format: string;
-      dimensions: components["schemas"]["Dimensions"];
-      level_count: number;
-      level_dimensions: components["schemas"]["Dimensions"][];
-      tile_size: number;
-      mpp_x?: number | null;
-      mpp_y?: number | null;
-      objective_power?: number | null;
-      properties: {
-        [key: string]: string;
-      };
-    };
-    SlideListResponse: {
-      slides: components["schemas"]["SlideMetadata"][];
-    };
-    SegmentRequest: {
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-      /** @default 2500 */
-      max_nuclei: number;
-    };
-    Region: {
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-    };
-    Nucleus: {
-      id: number;
-      centroid: number[];
-      area: number;
-      bbox: number[];
-      confidence?: number | null;
-      polygon: number[][];
-    };
-    SegmentResponse: {
-      slide_id: string;
-      method: string;
-      region: components["schemas"]["Region"];
-      count: number;
-      elapsed_ms: number;
-      nuclei: components["schemas"]["Nucleus"][];
-    };
-    ErrorResponse: {
-      error: {
-        code: string;
-        message: string;
-        details?: {
-          [key: string]: unknown;
+    schemas: {
+        /** Confidence */
+        Confidence: {
+            /** Score */
+            score: number;
+            /** Label */
+            label: string;
+            /** Reasons */
+            reasons?: string[];
         };
-      };
+        /** Dimensions */
+        Dimensions: {
+            /** Width */
+            width: number;
+            /** Height */
+            height: number;
+        };
+        /** DomainWarning */
+        DomainWarning: {
+            /** Code */
+            code: string;
+            /**
+             * Severity
+             * @enum {string}
+             */
+            severity: "info" | "warning" | "critical";
+            /** Message */
+            message: string;
+            /** Next Step */
+            next_step?: string | null;
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
+        /** Nucleus */
+        Nucleus: {
+            /** Id */
+            id: number;
+            /** Centroid */
+            centroid: [
+                number,
+                number
+            ];
+            /** Area */
+            area: number;
+            /** Bbox */
+            bbox: [
+                number,
+                number,
+                number,
+                number
+            ];
+            /** Confidence */
+            confidence?: number | null;
+            /** Polygon */
+            polygon: [
+                number,
+                number
+            ][];
+        };
+        /** Region */
+        Region: {
+            /** X */
+            x: number;
+            /** Y */
+            y: number;
+            /** Width */
+            width: number;
+            /** Height */
+            height: number;
+        };
+        /** ScanSummary */
+        ScanSummary: {
+            /** Total Files */
+            total_files: number;
+            /** Usable Slides */
+            usable_slides: number;
+            /** Problem Files */
+            problem_files: number;
+            /** Ignored Sidecars */
+            ignored_sidecars: number;
+            /** Duration Ms */
+            duration_ms: number;
+            /** Warnings */
+            warnings?: components["schemas"]["DomainWarning"][];
+        };
+        /** SegmentProvenance */
+        SegmentProvenance: {
+            /** App Version */
+            app_version: string;
+            /** Schema Version */
+            schema_version: string;
+            /** Slide Id */
+            slide_id: string;
+            region: components["schemas"]["Region"];
+            /** Parameters */
+            parameters: {
+                [key: string]: number | string;
+            };
+        };
+        /** SegmentRequest */
+        SegmentRequest: {
+            /** X */
+            x: number;
+            /** Y */
+            y: number;
+            /** Width */
+            width: number;
+            /** Height */
+            height: number;
+            /**
+             * Max Nuclei
+             * @default 2500
+             */
+            max_nuclei: number;
+        };
+        /** SegmentResponse */
+        SegmentResponse: {
+            /** Slide Id */
+            slide_id: string;
+            /** Method */
+            method: string;
+            region: components["schemas"]["Region"];
+            /** Count */
+            count: number;
+            /** Elapsed Ms */
+            elapsed_ms: number;
+            /** Nuclei */
+            nuclei: components["schemas"]["Nucleus"][];
+            confidence: components["schemas"]["Confidence"];
+            /** Warnings */
+            warnings?: components["schemas"]["SegmentWarning"][];
+            tissue: components["schemas"]["TissueSummary"];
+            provenance: components["schemas"]["SegmentProvenance"];
+        };
+        /** SegmentWarning */
+        SegmentWarning: {
+            /** Code */
+            code: string;
+            /** Severity */
+            severity: string;
+            /** Message */
+            message: string;
+            /** Next Step */
+            next_step?: string | null;
+        };
+        /** SlideInferences */
+        SlideInferences: {
+            /** Vendor */
+            vendor: string;
+            /**
+             * Modality
+             * @enum {string}
+             */
+            modality: "brightfield" | "fluorescence" | "unknown";
+            /** Stain */
+            stain?: string | null;
+            /** Mpp Available */
+            mpp_available: boolean;
+            /** Objective Available */
+            objective_available: boolean;
+            /**
+             * Sidecar Required
+             * @default false
+             */
+            sidecar_required: boolean;
+            /** Sidecar Ok */
+            sidecar_ok?: boolean | null;
+            /**
+             * Huge Slide
+             * @default false
+             */
+            huge_slide: boolean;
+            /**
+             * Sparse Risk
+             * @default false
+             */
+            sparse_risk: boolean;
+            /**
+             * Segmentation Suitable
+             * @default true
+             */
+            segmentation_suitable: boolean;
+            /** Confidence */
+            confidence: number;
+            /** Reasons */
+            reasons?: string[];
+        };
+        /** SlideListResponse */
+        SlideListResponse: {
+            /** Slides */
+            slides: components["schemas"]["SlideMetadata"][];
+            /** Problems */
+            problems?: components["schemas"]["SlideProblem"][];
+            summary: components["schemas"]["ScanSummary"];
+        };
+        /** SlideMetadata */
+        SlideMetadata: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Filename */
+            filename: string;
+            /** Relative Path */
+            relative_path: string;
+            /** Format */
+            format: string;
+            /** Fingerprint */
+            fingerprint: string;
+            /** Size Bytes */
+            size_bytes: number;
+            dimensions: components["schemas"]["Dimensions"];
+            /** Level Count */
+            level_count: number;
+            /** Level Dimensions */
+            level_dimensions: components["schemas"]["Dimensions"][];
+            /** Tile Size */
+            tile_size: number;
+            /** Mpp X */
+            mpp_x?: number | null;
+            /** Mpp Y */
+            mpp_y?: number | null;
+            /** Objective Power */
+            objective_power?: number | null;
+            /** Properties */
+            properties?: {
+                [key: string]: string;
+            };
+            inferences: components["schemas"]["SlideInferences"];
+            /** Warnings */
+            warnings?: components["schemas"]["DomainWarning"][];
+        };
+        /** SlideProblem */
+        SlideProblem: {
+            /** Id */
+            id: string;
+            /** Filename */
+            filename: string;
+            /** Relative Path */
+            relative_path: string;
+            /** Extension */
+            extension: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "empty" | "archive" | "dicom_package" | "unsupported_extension" | "missing_sidecar" | "corrupt_or_partial" | "open_failed";
+            /**
+             * Severity
+             * @enum {string}
+             */
+            severity: "info" | "warning" | "critical";
+            /** Message */
+            message: string;
+            /** Next Step */
+            next_step: string;
+        };
+        /** TissueSummary */
+        TissueSummary: {
+            /** Coverage */
+            coverage: number;
+            /** Mean Luminance */
+            mean_luminance: number;
+            /** Is Blank */
+            is_blank: boolean;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
+        };
     };
-  };
-  responses: {
-    /** @description JSON API error. */
-    Error: {
-      headers: {
-        [name: string]: unknown;
-      };
-      content: {
-        "application/json": components["schemas"]["ErrorResponse"];
-      };
-    };
-  };
-  parameters: {
-    SlideId: string;
-  };
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  getHealthz: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Health status. */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    healthz_healthz_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["HealthResponse"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
         };
-      };
     };
-  };
-  getReadyz: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Readiness status. */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    readyz_readyz_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["ReadyResponse"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string | number;
+                    };
+                };
+            };
         };
-      };
     };
-  };
-  listSlides: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Available slides. */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    list_slides_api_slides_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["SlideListResponse"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SlideListResponse"];
+                };
+            };
         };
-      };
     };
-  };
-  getSlide: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slide_id: components["parameters"]["SlideId"];
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Slide metadata. */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    get_dzi_api_slides__slide_id__dzi_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slide_id: string;
+            };
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["SlideMetadata"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
-      };
-      404: components["responses"]["Error"];
     };
-  };
-  getSlideDzi: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slide_id: components["parameters"]["SlideId"];
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Deep Zoom XML descriptor. */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    get_tile_api_slides__slide_id__files__level___tile_name__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slide_id: string;
+                level: number;
+                tile_name: string;
+            };
+            cookie?: never;
         };
-        content: {
-          "application/xml": string;
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
-      };
     };
-  };
-  getSlideTile: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slide_id: components["parameters"]["SlideId"];
-        level: number;
-        column: number;
-        row: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description JPEG tile. */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    get_thumbnail_api_slides__slide_id__thumbnail_get: {
+        parameters: {
+            query?: {
+                size?: number;
+            };
+            header?: never;
+            path: {
+                slide_id: string;
+            };
+            cookie?: never;
         };
-        content: {
-          "image/jpeg": string;
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
-      };
     };
-  };
-  getSlideThumbnail: {
-    parameters: {
-      query?: {
-        size?: number;
-      };
-      header?: never;
-      path: {
-        slide_id: components["parameters"]["SlideId"];
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description JPEG thumbnail. */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    segment_slide_region_api_slides__slide_id__segment_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slide_id: string;
+            };
+            cookie?: never;
         };
-        content: {
-          "image/jpeg": string;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SegmentRequest"];
+            };
         };
-      };
-    };
-  };
-  segmentSlideRegion: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        slide_id: components["parameters"]["SlideId"];
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SegmentRequest"];
-      };
-    };
-    responses: {
-      /** @description Nuclei segmentation. */
-      200: {
-        headers: {
-          [name: string]: unknown;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SegmentResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
-        content: {
-          "application/json": components["schemas"]["SegmentResponse"];
-        };
-      };
-      413: components["responses"]["Error"];
     };
-  };
+    get_slide_api_slides__slide_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slide_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SlideMetadata"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
 }

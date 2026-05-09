@@ -1,0 +1,19 @@
+{
+  "min_usable_slides": 4,
+  "required_slide_filenames": [
+    "CMU-1-Small-Region.svs",
+    "Case 123 – H&E São Paulo.svs",
+    "CMU-1-Saved-1_16.mrxs",
+    "Leica-Fluorescence-1.scn"
+  ],
+  "required_problem_categories": ["empty", "missing_sidecar", "open_failed"],
+  "required_problem_filenames": [
+    "empty.svs",
+    "missing-sidecar.mrxs",
+    "not-a-slide.svs",
+    "truncated-CMU-1.svs"
+  ],
+  "required_modalities": {
+    "Leica-Fluorescence-1.scn": "fluorescence"
+  }
+}

@@ -42,10 +42,20 @@ export function SlideWorkbench() {
   const [toast, setToast] = useState<string | null>(null);
   const [publishedCommit, setPublishedCommit] = useState<string | null>(null);
   const viewerRef = useRef<SlideViewerHandle | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const debugEnabled = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).has("debug"),
+    [],
+  );
 
   const healthQuery = useBackendHealth(apiBaseUrl);
   const slidesQuery = useSlides(apiBaseUrl);
-  const slides = useMemo(() => slidesQuery.data ?? [], [slidesQuery.data]);
+  const scan = slidesQuery.data;
+  const slides = useMemo(() => scan?.slides ?? [], [scan?.slides]);
+  const problems = scan?.problems ?? [];
+  const summary = scan?.summary ?? null;
   const selectedSlide = useMemo(
     () =>
       slides.find((slide) => slide.id === selectedSlideId) ?? slides[0] ?? null,
@@ -103,15 +113,35 @@ export function SlideWorkbench() {
       return;
     }
     try {
+      const controller = new AbortController();
+      abortRef.current = controller;
       const result = await segmentMutation.mutateAsync({
         ...region,
         max_nuclei: 2500,
+        signal: controller.signal,
       });
       setSegmentation(result);
-      setToast(`${result.count} nuclei counted.`);
+      setToast(
+        `${result.count} nuclei counted (${result.confidence.label} confidence).`,
+      );
     } catch (error) {
-      setToast(error instanceof Error ? error.message : "Segmentation failed.");
+      if (error instanceof DOMException && error.name === "AbortError") {
+        setToast("Segmentation cancelled.");
+      } else {
+        setToast(
+          error instanceof Error ? error.message : "Segmentation failed.",
+        );
+      }
+    } finally {
+      abortRef.current = null;
     }
+  }
+
+  function cancelSegmentation() {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    segmentMutation.reset();
+    setToast("Segmentation cancelled.");
   }
 
   return (
@@ -194,6 +224,12 @@ export function SlideWorkbench() {
               <RefreshCcw size={16} />
             </button>
           </div>
+          {summary ? (
+            <p className="panel-note">
+              {summary.usable_slides} usable · {summary.problem_files} issue ·{" "}
+              {summary.duration_ms} ms
+            </p>
+          ) : null}
           <div className="slide-list">
             {slides.map((slide) => (
               <button
@@ -211,6 +247,7 @@ export function SlideWorkbench() {
               >
                 <span>{slide.name}</span>
                 <small>
+                  {slide.inferences.vendor} · {slide.inferences.modality} ·{" "}
                   {slide.dimensions.width.toLocaleString()} x{" "}
                   {slide.dimensions.height.toLocaleString()}
                 </small>
@@ -224,6 +261,22 @@ export function SlideWorkbench() {
             ) : null}
           </div>
 
+          {problems.length > 0 ? (
+            <div className="scan-issues">
+              <h2>Scan Issues</h2>
+              {problems.slice(0, 5).map((problem) => (
+                <article
+                  key={problem.id}
+                  className={`issue-row ${problem.severity}`}
+                >
+                  <strong>{problem.filename}</strong>
+                  <span>{problem.message}</span>
+                  <small>{problem.next_step}</small>
+                </article>
+              ))}
+            </div>
+          ) : null}
+
           <div className="summary-block">
             <h2>Cell Count</h2>
             <div className="count-number">{segmentation?.count ?? 0}</div>
@@ -233,21 +286,51 @@ export function SlideWorkbench() {
                 <dd>{segmentation?.method ?? "None"}</dd>
               </div>
               <div>
+                <dt>Confidence</dt>
+                <dd>{segmentation?.confidence.label ?? "None"}</dd>
+              </div>
+              <div>
+                <dt>Tissue</dt>
+                <dd>
+                  {segmentation
+                    ? `${Math.round(segmentation.tissue.coverage * 100)}%`
+                    : "0%"}
+                </dd>
+              </div>
+              <div>
                 <dt>Elapsed</dt>
                 <dd>
                   {segmentation ? `${segmentation.elapsed_ms} ms` : "0 ms"}
                 </dd>
               </div>
             </dl>
-            <button
-              type="button"
-              className="primary-action"
-              onClick={() => void segmentViewport()}
-              disabled={!selectedSlide}
-            >
-              <Play size={16} />
-              Segment Viewport
-            </button>
+            {segmentation?.warnings.length ? (
+              <div className="result-warnings">
+                {segmentation.warnings.map((warning) => (
+                  <p key={warning.code}>{warning.message}</p>
+                ))}
+              </div>
+            ) : null}
+            {segmentMutation.isPending ? (
+              <button
+                type="button"
+                className="primary-action secondary"
+                onClick={cancelSegmentation}
+              >
+                <RefreshCcw size={16} />
+                Cancel
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="primary-action"
+                onClick={() => void segmentViewport()}
+                disabled={!selectedSlide}
+              >
+                <Play size={16} />
+                Segment Viewport
+              </button>
+            )}
           </div>
         </aside>
 
@@ -258,6 +341,11 @@ export function SlideWorkbench() {
             slide={selectedSlide}
             segmentation={segmentation}
           />
+          {debugEnabled ? (
+            <aside className="debug-panel" aria-label="Debug diagnostics">
+              <pre>{JSON.stringify({ scan, segmentation }, null, 2)}</pre>
+            </aside>
+          ) : null}
         </section>
       </div>
 

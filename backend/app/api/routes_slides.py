@@ -24,7 +24,7 @@ SegmentationServiceDep = Annotated[SegmentationService, Depends(get_segmentation
 @router.get("/slides", response_model=SlideListResponse)
 async def list_slides(store: SlideStoreDep) -> SlideListResponse:
     store.scan()
-    return SlideListResponse(slides=store.list_slides())
+    return SlideListResponse(slides=store.list_slides(), problems=store.problems, summary=store.summary)
 
 
 @router.get("/slides/{slide_id}/dzi")

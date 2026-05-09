@@ -8,7 +8,9 @@ from typing import Any
 from PIL import Image
 
 from app.core.errors import BadRequestError, UnsupportedSlideError
+from app.slides.inference import infer_slide
 from app.slides.models import Dimensions, SlideMetadata
+from app.slides.preflight import SUPPORTED_SLIDE_EXTENSIONS as SUPPORTED_EXTENSIONS
 
 try:
     import openslide
@@ -18,22 +20,6 @@ except Exception:  # pragma: no cover - optional native dependency
 
     class OpenSlideError(Exception):
         pass
-
-
-SUPPORTED_EXTENSIONS = {
-    ".svs",
-    ".tif",
-    ".tiff",
-    ".ndpi",
-    ".scn",
-    ".vms",
-    ".vmu",
-    ".mrxs",
-    ".bif",
-    ".jpg",
-    ".jpeg",
-    ".png",
-}
 
 
 def deepzoom_max_level(width: int, height: int) -> int:
@@ -50,10 +36,22 @@ def pyramid_dimensions(width: int, height: int) -> list[Dimensions]:
 
 
 class SlideReader(ABC):
-    def __init__(self, slide_id: str, path: Path, tile_size: int) -> None:
+    def __init__(
+        self,
+        slide_id: str,
+        path: Path,
+        tile_size: int,
+        *,
+        relative_path: str,
+        size_bytes: int,
+        fingerprint: str,
+    ) -> None:
         self.slide_id = slide_id
         self.path = path
         self.tile_size = tile_size
+        self.relative_path = relative_path
+        self.size_bytes = size_bytes
+        self.fingerprint = fingerprint
 
     @property
     @abstractmethod
@@ -102,10 +100,26 @@ class SlideReader(ABC):
 
 
 class OpenSlideReader(SlideReader):
-    def __init__(self, slide_id: str, path: Path, tile_size: int) -> None:
+    def __init__(
+        self,
+        slide_id: str,
+        path: Path,
+        tile_size: int,
+        *,
+        relative_path: str,
+        size_bytes: int,
+        fingerprint: str,
+    ) -> None:
         if openslide is None:
             raise UnsupportedSlideError("OpenSlide is not installed in this backend.")
-        super().__init__(slide_id, path, tile_size)
+        super().__init__(
+            slide_id,
+            path,
+            tile_size,
+            relative_path=relative_path,
+            size_bytes=size_bytes,
+            fingerprint=fingerprint,
+        )
         try:
             self._slide = openslide.OpenSlide(str(path))
         except OpenSlideError as exc:
@@ -122,19 +136,39 @@ class OpenSlideReader(SlideReader):
 
     def metadata(self) -> SlideMetadata:
         props = self._properties
+        format_name = str(openslide.OpenSlide.detect_format(str(self.path)) or "openslide")
+        mpp_x = _float_or_none(props.get("openslide.mpp-x"))
+        mpp_y = _float_or_none(props.get("openslide.mpp-y"))
+        objective_power = _float_or_none(props.get("openslide.objective-power"))
+        inferences, warnings = infer_slide(
+            filename=self.path.name,
+            format_name=format_name,
+            properties=props,
+            size_bytes=self.size_bytes,
+            dimensions=(self.width, self.height),
+            level_count=len(self._slide.level_dimensions),
+            mpp_x=mpp_x,
+            mpp_y=mpp_y,
+            objective_power=objective_power,
+        )
         return SlideMetadata(
             id=self.slide_id,
             name=self.path.stem,
             filename=self.path.name,
-            format=str(openslide.OpenSlide.detect_format(str(self.path)) or "openslide"),
+            relative_path=self.relative_path,
+            format=format_name,
+            fingerprint=self.fingerprint,
+            size_bytes=self.size_bytes,
             dimensions=Dimensions(width=self.width, height=self.height),
             level_count=len(self._slide.level_dimensions),
             level_dimensions=[Dimensions(width=int(w), height=int(h)) for w, h in self._slide.level_dimensions],
             tile_size=self.tile_size,
-            mpp_x=_float_or_none(props.get("openslide.mpp-x")),
-            mpp_y=_float_or_none(props.get("openslide.mpp-y")),
-            objective_power=_float_or_none(props.get("openslide.objective-power")),
+            mpp_x=mpp_x,
+            mpp_y=mpp_y,
+            objective_power=objective_power,
             properties=_safe_properties(props),
+            inferences=inferences,
+            warnings=warnings,
         )
 
     def read_region(self, x: int, y: int, width: int, height: int) -> Image.Image:
@@ -161,8 +195,24 @@ class OpenSlideReader(SlideReader):
 
 
 class PillowSlideReader(SlideReader):
-    def __init__(self, slide_id: str, path: Path, tile_size: int) -> None:
-        super().__init__(slide_id, path, tile_size)
+    def __init__(
+        self,
+        slide_id: str,
+        path: Path,
+        tile_size: int,
+        *,
+        relative_path: str,
+        size_bytes: int,
+        fingerprint: str,
+    ) -> None:
+        super().__init__(
+            slide_id,
+            path,
+            tile_size,
+            relative_path=relative_path,
+            size_bytes=size_bytes,
+            fingerprint=fingerprint,
+        )
         try:
             opened = Image.open(path)
             self._format = opened.format
@@ -180,16 +230,33 @@ class PillowSlideReader(SlideReader):
 
     def metadata(self) -> SlideMetadata:
         dims = pyramid_dimensions(self.width, self.height)
+        format_name = (self._format or self.path.suffix.lstrip(".") or "image").lower()
+        inferences, warnings = infer_slide(
+            filename=self.path.name,
+            format_name=format_name,
+            properties={},
+            size_bytes=self.size_bytes,
+            dimensions=(self.width, self.height),
+            level_count=len(dims),
+            mpp_x=None,
+            mpp_y=None,
+            objective_power=None,
+        )
         return SlideMetadata(
             id=self.slide_id,
             name=self.path.stem,
             filename=self.path.name,
-            format=(self._format or self.path.suffix.lstrip(".") or "image").lower(),
+            relative_path=self.relative_path,
+            format=format_name,
+            fingerprint=self.fingerprint,
+            size_bytes=self.size_bytes,
             dimensions=Dimensions(width=self.width, height=self.height),
             level_count=len(dims),
             level_dimensions=dims,
             tile_size=self.tile_size,
             properties={},
+            inferences=inferences,
+            warnings=warnings,
         )
 
     def read_region(self, x: int, y: int, width: int, height: int) -> Image.Image:
@@ -212,16 +279,38 @@ class PillowSlideReader(SlideReader):
         self._image.close()
 
 
-def open_slide_reader(slide_id: str, path: Path, tile_size: int) -> SlideReader:
+def open_slide_reader(
+    slide_id: str,
+    path: Path,
+    tile_size: int,
+    *,
+    relative_path: str,
+    size_bytes: int,
+    fingerprint: str,
+) -> SlideReader:
     if path.suffix.lower() not in SUPPORTED_EXTENSIONS:
         raise UnsupportedSlideError("Unsupported slide extension.")
     if openslide is not None:
         try:
             if openslide.OpenSlide.detect_format(str(path)):
-                return OpenSlideReader(slide_id, path, tile_size)
+                return OpenSlideReader(
+                    slide_id,
+                    path,
+                    tile_size,
+                    relative_path=relative_path,
+                    size_bytes=size_bytes,
+                    fingerprint=fingerprint,
+                )
         except Exception:
             pass
-    return PillowSlideReader(slide_id, path, tile_size)
+    return PillowSlideReader(
+        slide_id,
+        path,
+        tile_size,
+        relative_path=relative_path,
+        size_bytes=size_bytes,
+        fingerprint=fingerprint,
+    )
 
 
 def _clamp_region(

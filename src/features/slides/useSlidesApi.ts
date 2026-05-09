@@ -14,6 +14,7 @@ export type SegmentRegion = {
   width: number;
   height: number;
   max_nuclei: number;
+  signal?: AbortSignal;
 };
 
 export function useSlidesApi(apiBaseUrl: string) {
@@ -43,7 +44,7 @@ export function useSlides(apiBaseUrl: string) {
       if (error) {
         throw new Error(apiErrorMessage(error));
       }
-      return slideListSchema.parse(data).slides;
+      return slideListSchema.parse(data);
     },
   });
 }
@@ -51,16 +52,21 @@ export function useSlides(apiBaseUrl: string) {
 export function useSegmentSlide(apiBaseUrl: string, slideId: string | null) {
   const client = useSlidesApi(apiBaseUrl);
   return useMutation({
-    mutationFn: async (region: SegmentRegion): Promise<SegmentResponse> => {
+    mutationFn: async ({
+      signal,
+      ...region
+    }: SegmentRegion): Promise<SegmentResponse> => {
       if (!slideId) {
         throw new Error("No slide selected.");
       }
+      const options = {
+        params: { path: { slide_id: slideId } },
+        body: region,
+        signal,
+      } as Parameters<typeof client.POST>[1];
       const { data, error } = await client.POST(
         "/api/slides/{slide_id}/segment",
-        {
-          params: { path: { slide_id: slideId } },
-          body: region,
-        },
+        options,
       );
       if (error) {
         throw new Error(apiErrorMessage(error));

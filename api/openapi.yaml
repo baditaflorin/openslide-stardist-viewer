@@ -1,124 +1,165 @@
 openapi: 3.1.0
 info:
   title: OpenSlide StarDist Viewer API
+  description:
+    Tile streaming, nuclei segmentation, and cell counting for local pathology
+    slides.
   version: 0.1.0
-  description: Tile streaming, nuclei segmentation, and cell counting for local pathology slides.
-servers:
-  - url: http://localhost:25342
 paths:
   /healthz:
     get:
-      operationId: getHealthz
+      tags:
+        - health
+      summary: Healthz
+      operationId: healthz_healthz_get
       responses:
         "200":
-          description: Health status.
+          description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HealthResponse"
+                additionalProperties:
+                  type: string
+                type: object
+                title: Response Healthz Healthz Get
   /readyz:
     get:
-      operationId: getReadyz
+      tags:
+        - health
+      summary: Readyz
+      operationId: readyz_readyz_get
       responses:
         "200":
-          description: Readiness status.
+          description: Successful Response
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ReadyResponse"
+                additionalProperties:
+                  anyOf:
+                    - type: string
+                    - type: integer
+                type: object
+                title: Response Readyz Readyz Get
   /api/slides:
     get:
-      operationId: listSlides
+      tags:
+        - slides
+      summary: List Slides
+      operationId: list_slides_api_slides_get
       responses:
         "200":
-          description: Available slides.
+          description: Successful Response
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/SlideListResponse"
-  /api/slides/{slide_id}:
+  /api/slides/{slide_id}/dzi:
     get:
-      operationId: getSlide
+      tags:
+        - slides
+      summary: Get Dzi
+      operationId: get_dzi_api_slides__slide_id__dzi_get
       parameters:
-        - $ref: "#/components/parameters/SlideId"
+        - name: slide_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Slide Id
       responses:
         "200":
-          description: Slide metadata.
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SlideMetadata"
-        "404":
-          $ref: "#/components/responses/Error"
-  /api/slides/{slide_id}/dzi:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /api/slides/{slide_id}_files/{level}/{tile_name}:
     get:
-      operationId: getSlideDzi
+      tags:
+        - slides
+      summary: Get Tile
+      operationId: get_tile_api_slides__slide_id__files__level___tile_name__get
       parameters:
-        - $ref: "#/components/parameters/SlideId"
-      responses:
-        "200":
-          description: Deep Zoom XML descriptor.
-          content:
-            application/xml:
-              schema:
-                type: string
-  /api/slides/{slide_id}_files/{level}/{column}_{row}.jpeg:
-    get:
-      operationId: getSlideTile
-      parameters:
-        - $ref: "#/components/parameters/SlideId"
+        - name: slide_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Slide Id
         - name: level
           in: path
           required: true
           schema:
             type: integer
-            minimum: 0
-        - name: column
+            title: Level
+        - name: tile_name
           in: path
           required: true
           schema:
-            type: integer
-            minimum: 0
-        - name: row
-          in: path
-          required: true
-          schema:
-            type: integer
-            minimum: 0
+            type: string
+            title: Tile Name
       responses:
         "200":
-          description: JPEG tile.
+          description: Successful Response
           content:
-            image/jpeg:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
               schema:
-                type: string
-                format: binary
+                $ref: "#/components/schemas/HTTPValidationError"
   /api/slides/{slide_id}/thumbnail:
     get:
-      operationId: getSlideThumbnail
+      tags:
+        - slides
+      summary: Get Thumbnail
+      operationId: get_thumbnail_api_slides__slide_id__thumbnail_get
       parameters:
-        - $ref: "#/components/parameters/SlideId"
+        - name: slide_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Slide Id
         - name: size
           in: query
           required: false
           schema:
             type: integer
-            minimum: 128
-            maximum: 2048
             default: 900
+            title: Size
       responses:
         "200":
-          description: JPEG thumbnail.
+          description: Successful Response
           content:
-            image/jpeg:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
               schema:
-                type: string
-                format: binary
+                $ref: "#/components/schemas/HTTPValidationError"
   /api/slides/{slide_id}/segment:
     post:
-      operationId: segmentSlideRegion
+      tags:
+        - slides
+      summary: Segment Slide Region
+      operationId: segment_slide_region_api_slides__slide_id__segment_post
       parameters:
-        - $ref: "#/components/parameters/SlideId"
+        - name: slide_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Slide Id
       requestBody:
         required: true
         content:
@@ -127,203 +168,601 @@ paths:
               $ref: "#/components/schemas/SegmentRequest"
       responses:
         "200":
-          description: Nuclei segmentation.
+          description: Successful Response
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/SegmentResponse"
-        "413":
-          $ref: "#/components/responses/Error"
-components:
-  parameters:
-    SlideId:
-      name: slide_id
-      in: path
-      required: true
-      schema:
-        type: string
-  responses:
-    Error:
-      description: JSON API error.
-      content:
-        application/json:
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+  /api/slides/{slide_id}:
+    get:
+      tags:
+        - slides
+      summary: Get Slide
+      operationId: get_slide_api_slides__slide_id__get
+      parameters:
+        - name: slide_id
+          in: path
+          required: true
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            type: string
+            title: Slide Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SlideMetadata"
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+components:
   schemas:
-    HealthResponse:
-      type: object
-      required: [status]
+    Confidence:
       properties:
-        status:
+        score:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Score
+        label:
           type: string
-    ReadyResponse:
-      type: object
-      required: [status, slides]
-      properties:
-        status:
-          type: string
-        slides:
-          type: integer
-    Dimensions:
-      type: object
-      required: [width, height]
-      properties:
-        width:
-          type: integer
-          minimum: 1
-        height:
-          type: integer
-          minimum: 1
-    SlideMetadata:
+          title: Label
+        reasons:
+          items:
+            type: string
+          type: array
+          title: Reasons
       type: object
       required:
-        [
-          id,
-          name,
-          filename,
-          format,
-          dimensions,
-          level_count,
-          level_dimensions,
-          tile_size,
-          properties,
-        ]
+        - score
+        - label
+      title: Confidence
+    Dimensions:
       properties:
-        id:
-          type: string
-        name:
-          type: string
-        filename:
-          type: string
-        format:
-          type: string
-        dimensions:
-          $ref: "#/components/schemas/Dimensions"
-        level_count:
-          type: integer
-        level_dimensions:
-          type: array
-          items:
-            $ref: "#/components/schemas/Dimensions"
-        tile_size:
-          type: integer
-        mpp_x:
-          type: number
-          nullable: true
-        mpp_y:
-          type: number
-          nullable: true
-        objective_power:
-          type: number
-          nullable: true
-        properties:
-          type: object
-          additionalProperties:
-            type: string
-    SlideListResponse:
-      type: object
-      required: [slides]
-      properties:
-        slides:
-          type: array
-          items:
-            $ref: "#/components/schemas/SlideMetadata"
-    SegmentRequest:
-      type: object
-      required: [x, y, width, height]
-      properties:
-        x:
-          type: integer
-          minimum: 0
-        y:
-          type: integer
-          minimum: 0
         width:
           type: integer
-          minimum: 1
-          maximum: 4096
+          minimum: 1.0
+          title: Width
         height:
           type: integer
-          minimum: 1
-          maximum: 4096
-        max_nuclei:
-          type: integer
-          minimum: 1
-          maximum: 10000
-          default: 2500
-    Region:
+          minimum: 1.0
+          title: Height
       type: object
-      required: [x, y, width, height]
+      required:
+        - width
+        - height
+      title: Dimensions
+    DomainWarning:
       properties:
-        x:
-          type: integer
-        y:
-          type: integer
-        width:
-          type: integer
-        height:
-          type: integer
+        code:
+          type: string
+          title: Code
+        severity:
+          type: string
+          enum:
+            - info
+            - warning
+            - critical
+          title: Severity
+        message:
+          type: string
+          title: Message
+        next_step:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Next Step
+      type: object
+      required:
+        - code
+        - severity
+        - message
+      title: DomainWarning
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: "#/components/schemas/ValidationError"
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
     Nucleus:
-      type: object
-      required: [id, centroid, area, bbox, polygon]
       properties:
         id:
           type: integer
+          title: Id
         centroid:
+          prefixItems:
+            - type: number
+            - type: number
           type: array
-          minItems: 2
           maxItems: 2
-          items:
-            type: number
+          minItems: 2
+          title: Centroid
         area:
           type: number
+          title: Area
         bbox:
+          prefixItems:
+            - type: number
+            - type: number
+            - type: number
+            - type: number
           type: array
-          minItems: 4
           maxItems: 4
-          items:
-            type: number
+          minItems: 4
+          title: Bbox
         confidence:
-          type: number
-          nullable: true
+          anyOf:
+            - type: number
+            - type: "null"
+          title: Confidence
         polygon:
-          type: array
           items:
+            prefixItems:
+              - type: number
+              - type: number
             type: array
-            minItems: 2
             maxItems: 2
-            items:
-              type: number
-    SegmentResponse:
+            minItems: 2
+          type: array
+          title: Polygon
       type: object
-      required: [slide_id, method, region, count, elapsed_ms, nuclei]
+      required:
+        - id
+        - centroid
+        - area
+        - bbox
+        - polygon
+      title: Nucleus
+    Region:
+      properties:
+        x:
+          type: integer
+          title: X
+        y:
+          type: integer
+          title: Y
+        width:
+          type: integer
+          title: Width
+        height:
+          type: integer
+          title: Height
+      type: object
+      required:
+        - x
+        - y
+        - width
+        - height
+      title: Region
+    ScanSummary:
+      properties:
+        total_files:
+          type: integer
+          title: Total Files
+        usable_slides:
+          type: integer
+          title: Usable Slides
+        problem_files:
+          type: integer
+          title: Problem Files
+        ignored_sidecars:
+          type: integer
+          title: Ignored Sidecars
+        duration_ms:
+          type: number
+          title: Duration Ms
+        warnings:
+          items:
+            $ref: "#/components/schemas/DomainWarning"
+          type: array
+          title: Warnings
+      type: object
+      required:
+        - total_files
+        - usable_slides
+        - problem_files
+        - ignored_sidecars
+        - duration_ms
+      title: ScanSummary
+    SegmentProvenance:
+      properties:
+        app_version:
+          type: string
+          title: App Version
+        schema_version:
+          type: string
+          title: Schema Version
+        slide_id:
+          type: string
+          title: Slide Id
+        region:
+          $ref: "#/components/schemas/Region"
+        parameters:
+          additionalProperties:
+            anyOf:
+              - type: integer
+              - type: string
+              - type: number
+          type: object
+          title: Parameters
+      type: object
+      required:
+        - app_version
+        - schema_version
+        - slide_id
+        - region
+        - parameters
+      title: SegmentProvenance
+    SegmentRequest:
+      properties:
+        x:
+          type: integer
+          minimum: 0.0
+          title: X
+        y:
+          type: integer
+          minimum: 0.0
+          title: Y
+        width:
+          type: integer
+          maximum: 4096.0
+          exclusiveMinimum: 0.0
+          title: Width
+        height:
+          type: integer
+          maximum: 4096.0
+          exclusiveMinimum: 0.0
+          title: Height
+        max_nuclei:
+          type: integer
+          maximum: 10000.0
+          exclusiveMinimum: 0.0
+          title: Max Nuclei
+          default: 2500
+      type: object
+      required:
+        - x
+        - y
+        - width
+        - height
+      title: SegmentRequest
+    SegmentResponse:
       properties:
         slide_id:
           type: string
+          title: Slide Id
         method:
           type: string
+          title: Method
         region:
           $ref: "#/components/schemas/Region"
         count:
           type: integer
+          title: Count
         elapsed_ms:
           type: number
+          title: Elapsed Ms
         nuclei:
-          type: array
           items:
             $ref: "#/components/schemas/Nucleus"
-    ErrorResponse:
+          type: array
+          title: Nuclei
+        confidence:
+          $ref: "#/components/schemas/Confidence"
+        warnings:
+          items:
+            $ref: "#/components/schemas/SegmentWarning"
+          type: array
+          title: Warnings
+        tissue:
+          $ref: "#/components/schemas/TissueSummary"
+        provenance:
+          $ref: "#/components/schemas/SegmentProvenance"
       type: object
-      required: [error]
+      required:
+        - slide_id
+        - method
+        - region
+        - count
+        - elapsed_ms
+        - nuclei
+        - confidence
+        - tissue
+        - provenance
+      title: SegmentResponse
+    SegmentWarning:
       properties:
-        error:
+        code:
+          type: string
+          title: Code
+        severity:
+          type: string
+          title: Severity
+        message:
+          type: string
+          title: Message
+        next_step:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Next Step
+      type: object
+      required:
+        - code
+        - severity
+        - message
+      title: SegmentWarning
+    SlideInferences:
+      properties:
+        vendor:
+          type: string
+          title: Vendor
+        modality:
+          type: string
+          enum:
+            - brightfield
+            - fluorescence
+            - unknown
+          title: Modality
+        stain:
+          anyOf:
+            - type: string
+            - type: "null"
+          title: Stain
+        mpp_available:
+          type: boolean
+          title: Mpp Available
+        objective_available:
+          type: boolean
+          title: Objective Available
+        sidecar_required:
+          type: boolean
+          title: Sidecar Required
+          default: false
+        sidecar_ok:
+          anyOf:
+            - type: boolean
+            - type: "null"
+          title: Sidecar Ok
+        huge_slide:
+          type: boolean
+          title: Huge Slide
+          default: false
+        sparse_risk:
+          type: boolean
+          title: Sparse Risk
+          default: false
+        segmentation_suitable:
+          type: boolean
+          title: Segmentation Suitable
+          default: true
+        confidence:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Confidence
+        reasons:
+          items:
+            type: string
+          type: array
+          title: Reasons
+      type: object
+      required:
+        - vendor
+        - modality
+        - mpp_available
+        - objective_available
+        - confidence
+      title: SlideInferences
+    SlideListResponse:
+      properties:
+        slides:
+          items:
+            $ref: "#/components/schemas/SlideMetadata"
+          type: array
+          title: Slides
+        problems:
+          items:
+            $ref: "#/components/schemas/SlideProblem"
+          type: array
+          title: Problems
+        summary:
+          $ref: "#/components/schemas/ScanSummary"
+      type: object
+      required:
+        - slides
+        - summary
+      title: SlideListResponse
+    SlideMetadata:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+        filename:
+          type: string
+          title: Filename
+        relative_path:
+          type: string
+          title: Relative Path
+        format:
+          type: string
+          title: Format
+        fingerprint:
+          type: string
+          title: Fingerprint
+        size_bytes:
+          type: integer
+          title: Size Bytes
+        dimensions:
+          $ref: "#/components/schemas/Dimensions"
+        level_count:
+          type: integer
+          title: Level Count
+        level_dimensions:
+          items:
+            $ref: "#/components/schemas/Dimensions"
+          type: array
+          title: Level Dimensions
+        tile_size:
+          type: integer
+          title: Tile Size
+        mpp_x:
+          anyOf:
+            - type: number
+            - type: "null"
+          title: Mpp X
+        mpp_y:
+          anyOf:
+            - type: number
+            - type: "null"
+          title: Mpp Y
+        objective_power:
+          anyOf:
+            - type: number
+            - type: "null"
+          title: Objective Power
+        properties:
+          additionalProperties:
+            type: string
           type: object
-          required: [code, message]
-          properties:
-            code:
-              type: string
-            message:
-              type: string
-            details:
-              type: object
-              additionalProperties: true
+          title: Properties
+        inferences:
+          $ref: "#/components/schemas/SlideInferences"
+        warnings:
+          items:
+            $ref: "#/components/schemas/DomainWarning"
+          type: array
+          title: Warnings
+      type: object
+      required:
+        - id
+        - name
+        - filename
+        - relative_path
+        - format
+        - fingerprint
+        - size_bytes
+        - dimensions
+        - level_count
+        - level_dimensions
+        - tile_size
+        - inferences
+      title: SlideMetadata
+    SlideProblem:
+      properties:
+        id:
+          type: string
+          title: Id
+        filename:
+          type: string
+          title: Filename
+        relative_path:
+          type: string
+          title: Relative Path
+        extension:
+          type: string
+          title: Extension
+        size_bytes:
+          type: integer
+          title: Size Bytes
+        category:
+          type: string
+          enum:
+            - empty
+            - archive
+            - dicom_package
+            - unsupported_extension
+            - missing_sidecar
+            - corrupt_or_partial
+            - open_failed
+          title: Category
+        severity:
+          type: string
+          enum:
+            - info
+            - warning
+            - critical
+          title: Severity
+        message:
+          type: string
+          title: Message
+        next_step:
+          type: string
+          title: Next Step
+      type: object
+      required:
+        - id
+        - filename
+        - relative_path
+        - extension
+        - size_bytes
+        - category
+        - severity
+        - message
+        - next_step
+      title: SlideProblem
+    TissueSummary:
+      properties:
+        coverage:
+          type: number
+          maximum: 1.0
+          minimum: 0.0
+          title: Coverage
+        mean_luminance:
+          type: number
+          maximum: 255.0
+          minimum: 0.0
+          title: Mean Luminance
+        is_blank:
+          type: boolean
+          title: Is Blank
+      type: object
+      required:
+        - coverage
+        - mean_luminance
+        - is_blank
+      title: TissueSummary
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError
+servers:
+  - url: http://localhost:25342

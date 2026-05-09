@@ -1,0 +1,7 @@
+{
+  "id": "hamamatsu-1-ndpi-huge",
+  "source_url": "https://openslide.cs.cmu.edu/download/openslide-testdata/Hamamatsu/Hamamatsu-1.ndpi",
+  "size_bytes": 6902000000,
+  "why_external": "Public real NDPI is multi-GB; Phase 2 tests assert huge-slide policy through metadata thresholds and local scan warnings.",
+  "expected_warning_code": "huge_slide"
+}

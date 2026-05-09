@@ -1,0 +1,7 @@
+{
+  "id": "dicom-wsi-3dhistech-1",
+  "source_url": "https://openslide.cs.cmu.edu/download/openslide-testdata/DICOM/3DHISTECH-1.zip",
+  "size_bytes": 361508864,
+  "why_external": "Public real DICOM WSI package is hundreds of MB; Phase 2 tests assert classifier behavior for DICOM/archive inputs without committing the full archive.",
+  "expected_problem_category": "archive"
+}

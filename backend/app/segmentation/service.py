@@ -10,7 +10,16 @@ from PIL import Image
 from app.core.config import Settings
 from app.core.errors import RegionTooLargeError
 from app.metrics.instrumentation import NUCLEI_COUNT, SEGMENTATION_LATENCY, SEGMENTATION_REQUESTS
-from app.segmentation.models import Nucleus, Region, SegmentRequest, SegmentResponse
+from app.segmentation.models import (
+    Confidence,
+    Nucleus,
+    Region,
+    SegmentProvenance,
+    SegmentRequest,
+    SegmentResponse,
+    SegmentWarning,
+    TissueSummary,
+)
 from app.slides.reader import SlideReader
 
 logger = logging.getLogger(__name__)
@@ -30,9 +39,12 @@ class SegmentationService:
             )
         started = time.perf_counter()
         image = reader.read_region(request.x, request.y, request.width, request.height)
+        tissue = _analyze_tissue(image)
         labels, confidences, method = self._segment_image(image)
         nuclei = _labels_to_nuclei(labels, confidences, request.x, request.y, request.max_nuclei)
         elapsed = time.perf_counter() - started
+        slide_metadata = reader.metadata()
+        confidence, warnings = _confidence_for_result(method, tissue, slide_metadata.inferences.modality)
         SEGMENTATION_REQUESTS.labels(method=method).inc()
         SEGMENTATION_LATENCY.labels(method=method).observe(elapsed)
         NUCLEI_COUNT.labels(method=method).observe(len(nuclei))
@@ -43,6 +55,20 @@ class SegmentationService:
             count=len(nuclei),
             elapsed_ms=round(elapsed * 1000, 2),
             nuclei=nuclei,
+            confidence=confidence,
+            warnings=warnings,
+            tissue=tissue,
+            provenance=SegmentProvenance(
+                app_version="0.2.0",
+                schema_version="segment.v2",
+                slide_id=reader.slide_id,
+                region=Region(x=request.x, y=request.y, width=request.width, height=request.height),
+                parameters={
+                    "max_nuclei": request.max_nuclei,
+                    "backend": self.settings.segmentation_backend,
+                    "tile_size": self.settings.tile_size,
+                },
+            ),
         )
 
     def _segment_image(self, image: Image.Image) -> tuple[np.ndarray, dict[int, float], str]:
@@ -124,7 +150,7 @@ def _labels_to_nuclei(
         if len(xs) < 16:
             continue
         components.append((label_id, xs, ys))
-    components.sort(key=lambda item: len(item[1]), reverse=True)
+    components.sort(key=lambda item: (-len(item[1]), float(item[1].mean()), float(item[2].mean()), item[0]))
     for output_id, (label_id, xs, ys) in enumerate(components[:max_nuclei], start=1):
         min_x, max_x = int(xs.min()), int(xs.max())
         min_y, max_y = int(ys.min()), int(ys.max())
@@ -205,3 +231,76 @@ def _bbox_polygon(min_x: int, min_y: int, max_x: int, max_y: int) -> list[tuple[
         (float(max_x), float(max_y)),
         (float(min_x), float(max_y)),
     ]
+
+
+def _analyze_tissue(image: Image.Image) -> TissueSummary:
+    rgb = np.asarray(image.convert("RGB")).astype(np.float32)
+    red = rgb[:, :, 0]
+    green = rgb[:, :, 1]
+    blue = rgb[:, :, 2]
+    max_channel = rgb.max(axis=2)
+    min_channel = rgb.min(axis=2)
+    saturation = (max_channel - min_channel) / np.maximum(max_channel, 1)
+    luminance = 0.299 * red + 0.587 * green + 0.114 * blue
+    tissue_mask = (saturation > 0.05) & (luminance < 245)
+    coverage = float(tissue_mask.mean())
+    mean_luminance = float(luminance.mean())
+    return TissueSummary(
+        coverage=round(coverage, 4),
+        mean_luminance=round(mean_luminance, 2),
+        is_blank=coverage < 0.02,
+    )
+
+
+def _confidence_for_result(
+    method: str, tissue: TissueSummary, modality: str
+) -> tuple[Confidence, list[SegmentWarning]]:
+    score = 0.86 if method == "stardist" else 0.68 if method == "histomicstk-kofahi" else 0.42
+    reasons = [f"method={method}"]
+    warnings: list[SegmentWarning] = []
+    if method == "fallback-threshold":
+        warnings.append(
+            SegmentWarning(
+                code="fallback_segmentation",
+                severity="warning",
+                message="Fallback threshold segmentation was used.",
+                next_step="Install the StarDist/HistomicsTK backend dependencies for production counts.",
+            )
+        )
+        reasons.append("fallback method has limited domain accuracy")
+    if modality == "fluorescence":
+        score = min(score, 0.2)
+        warnings.append(
+            SegmentWarning(
+                code="fluorescence_not_brightfield",
+                severity="critical",
+                message="This slide looks like fluorescence, but the default nuclei workflow is brightfield-oriented.",
+                next_step="Treat this count as a diagnostic preview, not a trusted nuclei count.",
+            )
+        )
+        reasons.append("fluorescence modality lowers confidence")
+    if tissue.is_blank:
+        score = min(score, 0.18)
+        warnings.append(
+            SegmentWarning(
+                code="blank_or_sparse_region",
+                severity="critical",
+                message="The selected viewport appears blank or very sparse.",
+                next_step="Pan to tissue before running segmentation.",
+            )
+        )
+        reasons.append("very low tissue coverage")
+    elif tissue.coverage < 0.08:
+        score = min(score, 0.38)
+        warnings.append(
+            SegmentWarning(
+                code="low_tissue_region",
+                severity="warning",
+                message="The selected viewport has low tissue coverage.",
+                next_step="Review the overlay and consider segmenting a denser tissue region.",
+            )
+        )
+        reasons.append("low tissue coverage")
+    score = round(max(0.01, min(score, 0.99)), 3)
+    label = "high" if score >= 0.75 else "medium" if score >= 0.45 else "low"
+    return Confidence(score=score, label=label, reasons=reasons), warnings
