@@ -25,7 +25,11 @@ import {
 } from "../../api/client";
 import { Toast } from "../../ui/Toast";
 import { buildInfo } from "../../generated/buildInfo";
-import { SlideViewer, type SlideViewerHandle } from "../viewer/SlideViewer";
+import {
+  SlideViewer,
+  countAboveThreshold,
+  type SlideViewerHandle,
+} from "../viewer/SlideViewer";
 import type { SegmentResponse } from "./schema";
 import {
   buildSegmentationCurlCommand,
@@ -114,6 +118,11 @@ export function SlideWorkbench() {
   const [segmentation, setSegmentation] = useState<SegmentResponse | null>(
     null,
   );
+  // 0 = show every nucleus (matches the legacy behaviour). The slider
+  // ranges 0…1; we don't persist this between sessions because the
+  // appropriate threshold depends on the slide and the model the
+  // backend used.
+  const [confidenceThreshold, setConfidenceThreshold] = useState(0);
   const [lastRegion, setLastRegion] = useState<SegmentRequest | null>(null);
   const [toast, setToast] = useState<string | null>(initialHashState.error);
   const [publishedCommit, setPublishedCommit] = useState<string | null>(null);
@@ -526,6 +535,27 @@ export function SlideWorkbench() {
                 setMaxNuclei(maxNucleiSchema.parse(event.target.value))
               }
             />
+            <label htmlFor="confidenceThreshold">
+              <Settings size={14} />
+              Confidence threshold ({Math.round(confidenceThreshold * 100)}%)
+            </label>
+            <input
+              id="confidenceThreshold"
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={confidenceThreshold}
+              onChange={(event) =>
+                setConfidenceThreshold(Number(event.target.value))
+              }
+              aria-describedby="confidenceThresholdHelp"
+            />
+            <small id="confidenceThresholdHelp">
+              Nuclei below the threshold render dimmed (≈25% alpha) and drop out
+              of the "kept" count below. Nuclei without a confidence score stay
+              visible — there's no signal to filter on.
+            </small>
             <input
               ref={importInputRef}
               className="visually-hidden"
@@ -558,7 +588,11 @@ export function SlideWorkbench() {
 
           <div className="summary-block">
             <h2>Cell Count</h2>
-            <div className="count-number">{segmentation?.count ?? 0}</div>
+            <div className="count-number">
+              {confidenceThreshold > 0 && segmentation
+                ? `${countAboveThreshold(segmentation, confidenceThreshold)} / ${segmentation.count}`
+                : (segmentation?.count ?? 0)}
+            </div>
             <dl>
               <div>
                 <dt>Method</dt>
@@ -661,6 +695,7 @@ export function SlideWorkbench() {
             apiBaseUrl={apiBaseUrl}
             slide={selectedSlide}
             segmentation={segmentation}
+            confidenceThreshold={confidenceThreshold}
           />
           {debugEnabled ? (
             <aside className="debug-panel" aria-label="Debug diagnostics">

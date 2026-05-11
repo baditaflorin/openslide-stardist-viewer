@@ -24,14 +24,26 @@ type Props = {
   apiBaseUrl: string;
   slide: SlideMetadata | null;
   segmentation: SegmentResponse | null;
+  /**
+   * Minimum nucleus confidence required to render at full opacity. Nuclei
+   * below the threshold render at ~25% alpha so the user can still see them
+   * fade out as the slider moves. Nuclei with null confidence are treated
+   * as if they came in just above the threshold — they're shown but not
+   * counted in the "kept" total. Defaults to 0 (everything visible).
+   */
+  confidenceThreshold?: number;
 };
 
 export const SlideViewer = forwardRef<SlideViewerHandle, Props>(
-  function SlideViewer({ apiBaseUrl, slide, segmentation }, ref) {
+  function SlideViewer(
+    { apiBaseUrl, slide, segmentation, confidenceThreshold = 0 },
+    ref,
+  ) {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const overlayRef = useRef<HTMLCanvasElement | null>(null);
     const viewerRef = useRef<OpenSeadragon.Viewer | null>(null);
     const segmentationRef = useRef<SegmentResponse | null>(segmentation);
+    const thresholdRef = useRef<number>(confidenceThreshold);
 
     const tileSource = useMemo(() => {
       if (!slide) {
@@ -106,6 +118,7 @@ export const SlideViewer = forwardRef<SlideViewerHandle, Props>(
           viewer,
           overlayRef.current,
           segmentationRef.current,
+          thresholdRef.current,
         );
       viewer.addHandler("open", redraw);
       viewer.addHandler("animation", redraw);
@@ -118,14 +131,16 @@ export const SlideViewer = forwardRef<SlideViewerHandle, Props>(
 
     useEffect(() => {
       segmentationRef.current = segmentation;
+      thresholdRef.current = confidenceThreshold;
       if (viewerRef.current) {
         drawSegmentationOverlay(
           viewerRef.current,
           overlayRef.current,
           segmentation,
+          confidenceThreshold,
         );
       }
-    }, [segmentation]);
+    }, [segmentation, confidenceThreshold]);
 
     if (!slide) {
       return (
@@ -155,10 +170,45 @@ export const SlideViewer = forwardRef<SlideViewerHandle, Props>(
   },
 );
 
+/**
+ * Returns true when a nucleus should render at full opacity given the
+ * current confidence threshold. Nuclei with `null` / `undefined`
+ * confidence (e.g. legacy responses or backends that don't surface a
+ * per-nucleus score) are kept — there's no signal to filter on.
+ */
+export function passesConfidenceThreshold(
+  confidence: number | null | undefined,
+  threshold: number,
+): boolean {
+  if (threshold <= 0) return true;
+  if (confidence === null || confidence === undefined) return true;
+  return confidence >= threshold;
+}
+
+/**
+ * Count nuclei that pass the threshold. Surfaced so the UI can show
+ * "412 of 537 kept" without re-implementing the rule.
+ */
+export function countAboveThreshold(
+  segmentation: SegmentResponse | null,
+  threshold: number,
+): number {
+  if (!segmentation) return 0;
+  if (threshold <= 0) return segmentation.nuclei.length;
+  let kept = 0;
+  for (const nucleus of segmentation.nuclei) {
+    if (passesConfidenceThreshold(nucleus.confidence, threshold)) {
+      kept += 1;
+    }
+  }
+  return kept;
+}
+
 function drawSegmentationOverlay(
   viewer: OpenSeadragon.Viewer,
   canvas: HTMLCanvasElement | null,
   segmentation: SegmentResponse | null,
+  confidenceThreshold: number,
 ) {
   if (!canvas || !segmentation || !viewer.viewport) {
     if (canvas) {
@@ -181,10 +231,19 @@ function drawSegmentationOverlay(
   context.scale(pixelRatio, pixelRatio);
   context.clearRect(0, 0, rect.width, rect.height);
   context.lineWidth = 1.5;
-  context.strokeStyle = "rgba(41, 204, 151, 0.9)";
-  context.fillStyle = "rgba(255, 219, 102, 0.9)";
 
   for (const nucleus of segmentation.nuclei) {
+    const keep = passesConfidenceThreshold(
+      nucleus.confidence,
+      confidenceThreshold,
+    );
+    // Below-threshold nuclei stay visible at ~25% alpha so the user can
+    // see them fade as the slider moves rather than disappearing
+    // abruptly — important for picking a defensible threshold.
+    context.globalAlpha = keep ? 1 : 0.25;
+    context.strokeStyle = "rgba(41, 204, 151, 0.9)";
+    context.fillStyle = "rgba(255, 219, 102, 0.9)";
+
     const [x1, y1, x2, y2] = nucleus.bbox;
     const topLeft = viewer.viewport.imageToViewerElementCoordinates(
       new OpenSeadragon.Point(x1, y1),
@@ -205,4 +264,5 @@ function drawSegmentationOverlay(
     context.arc(centroid.x, centroid.y, 2.6, 0, Math.PI * 2);
     context.fill();
   }
+  context.globalAlpha = 1;
 }
